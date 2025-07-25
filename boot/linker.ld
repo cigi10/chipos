@@ -6,7 +6,6 @@ MEMORY
     RAM : ORIGIN = 0x80000000, LENGTH = 128M
 }
 
-/* Define program headers with proper permissions */
 PHDRS
 {
     text PT_LOAD FLAGS(5);    /* R + X (read + execute) */
@@ -18,26 +17,26 @@ SECTIONS
 {
     . = 0x80000000;
     
-    /* Code section - read and execute only */
+    /* code section - read and execute only */
     .text : {
         *(.text.boot)
         *(.text)
         *(.text.*)
     } > RAM :text
     
-    /* Page align between different permission segments */
+    /* page align between different permission segments */
     . = ALIGN(4096);
     
-    /* Read-only data */
+    /* read-only data */
     .rodata : {
         *(.rodata)
         *(.rodata.*)
     } > RAM :rodata
     
-    /* Page align before writable data */
+    /* page align before writable data */
     . = ALIGN(4096);
     
-    /* Writable data */
+    /* writable data */
     .data : {
         *(.data)
         *(.data.*)
@@ -58,7 +57,7 @@ SECTIONS
     stack_top = .;
     kernel_end = .;
     
-    /* Discard unnecessary sections */
+    /* discard unnecessary sections */
     /DISCARD/ : {
         *(.comment)
         *(.note*)
