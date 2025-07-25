@@ -1,4 +1,3 @@
-/* Linker script for RISC-V 64-bit kernel */
 ENTRY(_start)
 
 MEMORY
