@@ -2,7 +2,7 @@
 #include "drivers/console.h"
 #include "memory/memory.h"
 #include "shell/shell.h"
-#include "fs/fs.h"            // ✅ Filesystem include
+#include "fs/fs.h"            
 #include "include/types.h"
 #include "../lib/string.h"
 #include "../editor/editor.h"
