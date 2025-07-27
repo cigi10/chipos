@@ -6,12 +6,12 @@ filesystem_t fs;
 static uint32_t system_time = 0;
 
 int fs_init(void) {
-    // Clear the entire filesystem structure
+    // clear the entire filesystem structure
     memset(&fs, 0, sizeof(filesystem_t));
     
     console_puts("[DEBUG] Initializing filesystem...\n");
     
-    // Initialize root directory (ID 0)
+    // initialize root directory (ID 0)
     fs.files[0].name[0] = '/';
     fs.files[0].name[1] = '\0';
     fs.files[0].type = FILE_TYPE_DIRECTORY;
@@ -22,7 +22,7 @@ int fs_init(void) {
     fs.files[0].modified_time = system_time;
     fs.files[0].data_offset = 0;
     
-    // Initialize filesystem metadata
+    // initialize filesystem metadata
     fs.file_count = 1;          // Start with 1 (root directory)
     fs.current_dir = 0;         // Start in root directory
     fs.root_dir = 0;            // Root directory ID
@@ -34,7 +34,7 @@ int fs_init(void) {
     console_puts("[DEBUG] Initial file_count: 1\n");
     console_puts("[DEBUG] Initial next_file_id: 1\n");
     
-    // Create initial system directories
+    // create initial system directories
     console_puts("[DEBUG] Creating initial directories...\n");
     
     int result = fs_make_directory("home");
@@ -73,7 +73,7 @@ int fs_init(void) {
     console_puts(buf);
     console_puts("\n");
     
-    // Debug: Show what directories were actually created
+    // DEBUG: show what directories were actually created
     console_puts("[DEBUG] Directory table after init:\n");
     for (uint32_t i = 0; i < fs.file_count; i++) {
         console_puts("[DEBUG] ID ");
@@ -173,21 +173,21 @@ void fs_list_directory(int dir_id, bool long_listing) {
                 itoa(f->size, size_buf, 16);
                 itoa(f->parent_id, parent_buf, 16);
 
-                // Print type
+                // print type
                 console_putc((f->type == FILE_TYPE_DIRECTORY) ? 'd' : 'f');
                 console_puts("     0x");
                 
-                // Print size
+                // print size
                 console_puts(size_buf);
                 console_puts(" ");
                 
-                // Print name
+                // print name
                 console_puts(f->name);
                 
-                // Align spacing manually if needed (optional)
+                // align spacing manually if needed (optional)
                 console_puts(" 0x");
                 
-                // Print parent ID
+                // print parent ID
                 console_puts(parent_buf);
                 console_puts("\n");
             } else {
@@ -208,23 +208,23 @@ static void rebuild_current_path() {
     int depth = 0;
     uint32_t curr = fs.current_dir;
 
-    // Traverse up to root, pushing names onto stack
+    // traverse up to root, pushing names onto stack
     while (curr != fs.root_dir && depth < 32) {
         strcpy(stack[depth], fs.files[curr].name);
         curr = fs.files[curr].parent_id;
         depth++;
     }
 
-    // Start path with root
+    // start path with root
     strcpy(fs.current_path, "/");
 
-    // Rebuild path from stack
+    // rebuild path from stack
     for (int i = depth - 1; i >= 0; i--) {
         strcat(fs.current_path, stack[i]);
         if (i != 0) strcat(fs.current_path, "/");
     }
 
-    // Fallback in case something went wrong
+    // fallback in case something went wrong
     if (fs.current_path[0] == '\0') {
         strcpy(fs.current_path, "/");
     }
@@ -259,7 +259,6 @@ int fs_change_directory(const char* path) {
 
         fs.current_dir = parent;
 
-        // ✅ Update current_path
         rebuild_current_path();
 
         return FS_SUCCESS;
@@ -292,7 +291,6 @@ int fs_change_directory(const char* path) {
 
     fs.current_dir = target_id;
 
-    // ✅ Update current_path
     rebuild_current_path();
 
     return FS_SUCCESS;
@@ -303,13 +301,13 @@ int fs_make_directory(const char* name) {
     console_puts(name);
     console_puts("\n");
     
-    // Check for valid name
+    // check for valid name
     if (!name || strlen(name) == 0 || strlen(name) >= MAX_FILENAME) {
         console_puts("[DEBUG] Invalid directory name\n");
         return FS_ERROR_INVALID_NAME;
     }
     
-    // Check if directory already exists in current directory
+    // check if directory already exists in current directory
     int existing = find_file_in_dir(fs.current_dir, name);
     if (existing >= 0) {
         console_puts("[DEBUG] Directory already exists with ID: ");
@@ -321,13 +319,13 @@ int fs_make_directory(const char* name) {
         return FS_ERROR_ALREADY_EXISTS;
     }
     
-    // Check space in file table
+    // check space in file table
     if (fs.file_count >= MAX_FILES) {
         console_puts("[DEBUG] No space left in file table\n");
         return FS_ERROR_NO_SPACE;
     }
     
-    // Check if next_file_id is valid
+    // check if next_file_id is valid
     if (fs.next_file_id >= MAX_FILES) {
         console_puts("[DEBUG] No more file IDs available\n");
         return FS_ERROR_NO_SPACE;
@@ -344,7 +342,7 @@ int fs_make_directory(const char* name) {
     console_puts(buf);
     console_puts(")\n");
     
-    // Fill directory metadata
+    // fill directory metadata
     file_entry_t* entry = &fs.files[new_id];
     entry->type = FILE_TYPE_DIRECTORY;
     entry->size = 0;
@@ -355,11 +353,11 @@ int fs_make_directory(const char* name) {
     entry->data_offset = 0;
     strcpy(entry->name, name);
     
-    // Update filesystem counters
+    // update filesystem counters
     fs.file_count++;
     fs.next_file_id++;
     
-    // Print debug info
+    // print debug info
     console_puts("[DEBUG] Directory created successfully\n");
     console_puts("[DEBUG] New directory ID: 0x");
     itoa(new_id, buf, 16);
@@ -549,7 +547,7 @@ int fs_getcwd(char* buffer, uint32_t size) {
 
     // Special case: root directory
     if (fs.current_dir == fs.root_dir) {
-        if (size < 2) return FS_ERROR_NO_SPACE;  // Need at least "/" and '\0'
+        if (size < 2) return FS_ERROR_NO_SPACE;  
         strcpy(buffer, "/");
         return FS_SUCCESS;
     }
@@ -564,7 +562,6 @@ int fs_getcwd(char* buffer, uint32_t size) {
         depth++;
         current = fs.files[current].parent_id;
 
-        // Prevent infinite loop in case of malformed parent links
         if (current == fs.current_dir) break;
     }
 
@@ -574,7 +571,6 @@ int fs_getcwd(char* buffer, uint32_t size) {
         strcat(buffer, path_stack[i]);
     }
 
-    // Final check
     if (strlen(buffer) + 1 > size) return FS_ERROR_NO_SPACE;
 
     return FS_SUCCESS;
