@@ -8,11 +8,11 @@
 #define UART_RHR 0x00  // Receive Holding Register (read-only, same address as THR)
 #define UART_LSR 0x05  // Line Status Register (read-only)
 
-// Line Status Register bits
+// line Status Register bits
 #define LSR_THRE 0x20  // Transmit Holding Register Empty
 #define LSR_DR 0x01    // Data Ready (received data available)
 
-// Memory-mapped I/O helpers
+// memory-mapped I/O helpers
 static inline void mmio_write8(unsigned long addr, unsigned char value) {
     *(volatile unsigned char*)addr = value;
 }
@@ -22,22 +22,18 @@ static inline unsigned char mmio_read8(unsigned long addr) {
 }
 
 void console_init(void) {
-    // For QEMU, the UART is already initialized
-    // In a real system, you'd set baud rate, configure pins, etc.
-    // Let's just send a test to verify it works
+    // for QEMU, the UART is already initialized
     console_puts("UART initialized - input/output ready\n");
 }
 
 void console_putchar(char c) {
-    // Wait until transmit buffer is empty
+    // wait until transmit buffer is empty
     while (!(mmio_read8(UART_BASE + UART_LSR) & LSR_THRE)) {
-        // Busy wait - in a real OS you'd yield to other tasks here
     }
     // Send the character
     mmio_write8(UART_BASE + UART_THR, c);
 }
 
-// Alias for console_putchar to match fs.c usage
 void console_putc(char c) {
     console_putchar(c);
 }
@@ -56,7 +52,7 @@ void console_println(const char* str) {
 
 void console_put_hex(unsigned int value) {
     console_puts("0x");
-    // Print each hex digit, starting from most significant
+    // print each hex digit, starting from most significant
     for (int i = 28; i >= 0; i -= 4) {
         unsigned int digit = (value >> i) & 0xF;
         if (digit < 10) {
@@ -69,20 +65,19 @@ void console_put_hex(unsigned int value) {
 
 // INPUT FUNCTIONS
 char console_getchar(void) {
-    // Wait until data is available - pure polling, no WFI
+    // wait until data is available - pure polling, no WFI
     while (!(mmio_read8(UART_BASE + UART_LSR) & LSR_DR)) {
-        // Busy wait - removed WFI as it might not work properly in QEMU
     }
-    // Read the character
+    // read the character
     return mmio_read8(UART_BASE + UART_RHR);
 }
 
 int console_getchar_nonblocking(void) {
-    // Check if data is available without waiting
+    // check if data is available without waiting
     if (mmio_read8(UART_BASE + UART_LSR) & LSR_DR) {
         return mmio_read8(UART_BASE + UART_RHR);
     }
-    return -1;  // No data available
+    return -1;  // no data available
 }
 
 void console_gets(char* buffer, int max_length) {
@@ -92,27 +87,27 @@ void console_gets(char* buffer, int max_length) {
     while (pos < max_length - 1) {
         c = console_getchar();
         
-        // Handle special characters
+        // handle special characters
         if (c == '\r' || c == '\n') {
-            // Enter key - end input
+            // enter key - end input
             console_putchar('\n');
             break;
         } else if (c == '\b' || c == 127) {
-            // Backspace or DEL
+            // backspace or DEL
             if (pos > 0) {
                 pos--;
-                console_puts("\b \b");  // Move back, space, move back
+                console_puts("\b \b");  // move back, space, move back
             }
         } else if (c >= 32 && c <= 126) {
-            // Printable character
+            // printable character
             buffer[pos] = c;
-            console_putchar(c);  // Echo the character
+            console_putchar(c);  // echo the character
             pos++;
         }
-        // Ignore other control characters
+        // ignore other control characters
     }
     
-    buffer[pos] = '\0';  // Null terminate
+    buffer[pos] = '\0';  // null terminate
 }
 
 void console_prompt(const char* prompt_text) {
