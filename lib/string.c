@@ -47,11 +47,11 @@ char* strcpy(char* dest, const char* src) {
 
 char* strcat(char* dest, const char* src) {
     char* original_dest = dest;
-    // find the end of dest
+    
     while (*dest != '\0') {
         dest++;
     }
-    // copy src to the end of dest
+
     while (*src != '\0') {
         *dest = *src;
         dest++;
