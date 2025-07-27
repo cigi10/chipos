@@ -140,7 +140,6 @@ static command_t commands[] = {
     {"touch", "Create empty file", cmd_touch},
     {"cat", "Display file contents", cmd_cat},
     {"colortest", "Test ANSI color support", cmd_colortest},
-    // ADD THESE MISSING COMMANDS:
     {"cp", "Copy file", cmd_cp},
     {"mv", "Move/rename file", cmd_mv},
     {"find", "Find files", cmd_find},
@@ -559,6 +558,7 @@ static void cmd_help(int argc __attribute__((unused)), char* argv[] __attribute_
     console_println("  rm <file>    - Remove file");
     console_println("  touch <file> - Create empty file");
     console_println("  cat <file>   - Display file with syntax highlighting");
+    console_println("  code <file>  - Open file in VIM-style advanced editor");
     
     console_println("\nSystem Commands:");
     console_println("  about        - Show system information");
