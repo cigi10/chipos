@@ -1,166 +1,270 @@
 # ChipOS
 
-A specialized RISC-V operating system designed for hardware development and embedded systems education. ChipOS provides an integrated development environment with multi-language syntax highlighting, making it perfect for ECE students and hardware engineers.
+A minimal RISC-V operating system with integrated development tools for embedded systems and computer architecture education. ChipOS provides syntax-aware text editing, file management, and a complete shell environment that runs directly on RISC-V hardware or QEMU.
+
+Built as a microkernel with modular components, ChipOS offers a practical platform for learning OS development while providing useful tools for hardware design workflows.
 
 ## Features
 
 ### Development Environment
-- **Multi-language syntax highlighting** for C/C++, Verilog/SystemVerilog, and RISC-V Assembly
-- **Built-in text editor** with language-aware features and syntax coloring
-- **Interactive shell** with comprehensive command set
-- **File management** with directory operations and file manipulation
+- **Dual text editors**: 
+  - `edit` - Basic editor with insert mode and save/quit commands
+  - `code` - VIM-style modal editor with advanced navigation
+- **Multi-language syntax highlighting** for C/C++, Verilog/SystemVerilog, and RISC-V assembly
+- **Interactive shell** with command history and tab completion
+- **File system operations** with hierarchical directory support
 
 ### System Components
-- **Memory Management** - Dynamic allocation with heap tracking
-- **Filesystem** - Hierarchical directory structure with full CRUD operations
-- **UART Communication** - Serial input/output for hardware interaction
-- **Debug Support** - Extensive debugging output and system introspection
+- **Memory Management** - Dynamic heap allocation with usage tracking and leak detection
+- **Filesystem** - In-memory hierarchical filesystem with metadata management
+- **UART Driver** - Serial communication for hardware interfacing
+- **Debug Support** - Built-in system introspection and memory diagnostics
 
-### Hardware Focus
-- **RISC-V Native** - Built specifically for RISC-V architecture
-- **Hardware Development Workflow** - Optimized for digital design and embedded programming
-- **Educational Tools** - Perfect for learning computer architecture and OS development
-
-## System Requirements
-
-- **Architecture**: RISC-V 64-bit
-- **Emulator**: QEMU RISC-V system emulation
-- **Toolchain**: RISC-V GNU toolchain
-- **Build System**: GNU Make
-
-## Building ChipOS
-
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/chipos.git
-cd chipos
-
-# Build the OS
-make clean && make
-
-# Run in QEMU
-qemu-system-riscv64 -machine virt -bios none -kernel build/kernel.bin -nographic
-```
+### Hardware Integration
+- **RISC-V Native** - Optimized for RV64IMAC instruction set
+- **Bare Metal** - No external dependencies, fully self-contained kernel
+- **QEMU Compatible** - Runs seamlessly on qemu-system-riscv64
+- **Lightweight** - Complete system runs in ~64KB of RAM
 
 ## Quick Start
 
-After booting ChipOS, you'll see the interactive shell. Try these commands:
+### Requirements
+- RISC-V GNU Toolchain (`riscv64-unknown-elf-gcc`)
+- QEMU with RISC-V support (`qemu-system-riscv64`)
+- GNU Make
 
+### Installation
 ```bash
-# Explore the filesystem
-ls
-mkdir myproject
-cd myproject
+# install toolchain (Ubuntu/Debian)
+sudo apt install gcc-riscv64-linux-gnu qemu-system-misc
 
-# Create and edit files
-touch program.c
-edit program.c
-# (Write some C code with syntax highlighting)
+# clone and build
+git clone https://github.com/yourusername/chipos.git
+cd chipos
+make clean && make
 
-# View files with syntax highlighting
-cat program.c
-
-# System information
-about
-mem
+# run in QEMU
+make run
+# Or manually: qemu-system-riscv64 -machine virt -bios none -kernel build/kernel.bin -nographic
 ```
 
-## Supported Languages
+## Usage Guide
 
-### C/C++ (.c, .h)
-- Keyword highlighting for control structures, data types
-- Comment and string literal highlighting
-- Preprocessor directive support
+### Basic Workflow
+```bash
+# file system navigation
+ls                    # list current directory
+mkdir hardware        # create project directory
+cd hardware
+pwd                   # show current path
 
-### Verilog/SystemVerilog (.v, .sv)
-- Module, always, and wire keyword highlighting
-- Port and signal highlighting
-- Comment support
+# file operations
+touch cpu.v           # create new Verilog file
+code cpu.v            # edit with VIM-style editor
+cat cpu.v             # view with syntax highlighting
+rm old_file.c         # remove file
+```
 
-### RISC-V Assembly (.s, .asm)
-- Instruction highlighting (arithmetic, logic, memory, control)
-- Register name highlighting (both x and ABI names)
-- Label and comment support
-- Number format support (hex, decimal, binary)
+### Text Editors
 
-## 🎮 Shell Commands
+**Basic Editor (`edit`)**
+- Simple insert mode editing
+- `:w` to save, `:q` to quit, `:wq` to save and quit
+- Arrow key navigation
+
+**VIM-style Editor (`code`)**
+- Modal editing (normal/insert modes) 
+- Standard VIM keybindings for navigation
+- `:w`, `:q`, `:wq` commands
+- Advanced cursor movement
+
+## Command Reference
 
 ### File Operations
-- `ls [dir]` - List directory contents
-- `cd <dir>` - Change directory  
-- `pwd` - Print working directory
-- `mkdir <dir>` - Create directory
-- `rmdir <dir>` - Remove directory
-- `rm <file>` - Remove file
-- `touch <file>` - Create empty file
-- `cat <file>` - Display file with syntax highlighting
+| Command | Description | Example |
+|---------|-------------|---------|
+| `ls [dir]` | List directory contents | `ls /projects` |
+| `cd <dir>` | Change directory | `cd src` |
+| `pwd` | Print working directory | `pwd` |
+| `mkdir <dir>` | Create directory | `mkdir tests` |
+| `rmdir <dir>` | Remove empty directory | `rmdir old` |
+| `rm <file>` | Delete file | `rm temp.txt` |
+| `touch <file>` | Create empty file | `touch main.c` |
+| `cat <file>` | Display file with highlighting | `cat program.v` |
+| `edit <file>` | Open in basic editor | `edit config.h` |
+| `code <file>` | Open in VIM editor | `code algorithm.c` |
 
 ### System Commands
-- `about` - Show system information
-- `mem` - Show memory usage
-- `calc <expr>` - Simple calculator
-- `clear` - Clear screen
-- `echo <text>` - Echo text
-- `colortest` - Test color support
+| Command | Description | Example |
+|---------|-------------|---------|
+| `about` | Show system information | `about` |
+| `mem` | Display memory usage | `mem` |
+| `calc <expr>` | Evaluate expression | `calc 16 * 1024` |
+| `clear` | Clear screen | `clear` |
+| `echo <text>` | Print text | `echo "Hello World"` |
+| `colortest` | Test terminal colors | `colortest` |
 
-### Editor Commands
-- `:w` - Save file
-- `:q` - Quit without saving
-- `:wq` - Save and quit
-- Navigation with arrow keys
-- Insert mode for editing
+## Syntax Highlighting
+
+### C/C++ (`.c`, `.h`, `.cpp`)
+- **Keywords**: `if`, `while`, `for`, `struct`, `typedef`, `return`
+- **Types**: `int`, `char`, `void`, `unsigned`, `static`
+- **Preprocessor**: `#include`, `#define`, `#ifdef`
+- **Literals**: Strings, characters, numbers
+- **Comments**: `//` and `/* */` style
+
+### Verilog/SystemVerilog (`.v`, `.sv`)
+- **Keywords**: `module`, `endmodule`, `always`, `assign`
+- **Types**: `wire`, `reg`, `input`, `output`, `logic`
+- **Constructs**: `begin`/`end`, `case`/`endcase`
+- **Operators**: Bitwise, logical, arithmetic
+- **Comments**: `//` and `/* */` style
+
+### RISC-V Assembly (`.s`, `.asm`)
+- **Instructions**: `add`, `sub`, `lw`, `sw`, `beq`, `jal`
+- **Registers**: Both numeric (`x0`-`x31`) and ABI names (`zero`, `ra`, `sp`)
+- **Labels**: Jump targets and function names
+- **Directives**: `.text`, `.data`, `.global`
+- **Immediates**: Hex (`0x1000`), decimal, binary (`0b1010`)
 
 ## Architecture
 
-ChipOS is structured as a microkernel with the following components:
-
 ```
 ChipOS/
-├── boot/           # Boot loader and linker scripts
-├── kernel/         # Core kernel components
-│   ├── drivers/    # Hardware drivers (UART, console)
-│   ├── memory/     # Memory management
-│   ├── shell/      # Interactive shell
-│   ├── editor/     # Text editor with syntax highlighting
-│   └── fs/         # Filesystem implementation
-├── lib/            # Standard library functions
-└── build/          # Build artifacts
+├── boot/               # Boot sequence and initialization
+│   ├── boot.s          # RISC-V assembly bootstrap
+│   └── linker.ld       # Memory layout and linking script
+├── kernel/             # Core kernel components
+│   ├── drivers/        # Hardware abstraction layer
+│   ├── editor/         # Text editing subsystem
+│   ├── fs/             # Filesystem implementation
+│   ├── include/        # Kernel header files
+│   ├── memory/         # Memory management
+│   ├── shell/          # Interactive shell
+│   │   ├── shell.c     # Command interpreter
+│   │   └── shell.h     # Shell interface definitions
+│   └── kernel.c        # Main kernel entry point
+├── lib/                # Utility library
+│   ├── string.c        # String manipulation functions
+│   └── string.h        # String library headers
+├── build/              # Build artifacts
+│   ├── *.o             # Object files (boot, console, editor, etc.)
+│   ├── kernel.elf      # ELF executable with debug symbols
+│   └── kernel.bin      # Final stripped kernel binary
+├── .vscode/            # VS Code configuration
+├── Makefile            # Build system
+└── README.md           # This file
 ```
-
-## Educational Value
-
-ChipOS demonstrates key operating system concepts:
-
-- **Boot Process** - From assembly bootstrap to C kernel
-- **Memory Management** - Heap allocation and memory tracking
-- **I/O Systems** - UART driver implementation
-- **File Systems** - Hierarchical directory structures
-- **User Interface** - Shell and editor implementation
-- **Hardware Abstraction** - RISC-V specific optimizations
 
 ## Technical Details
 
-- **Language**: C with RISC-V assembly bootstrap
-- **Architecture**: RISC-V 64-bit (RV64IMAC)
-- **Memory Model**: medany code model
-- **Build Flags**: Freestanding environment, no standard library
-- **Debugging**: Extensive debug output for development
+## Technical Details
 
-## Contributing
+### Memory Layout
+| Region | Purpose | Address Range |
+|--------|---------|---------------|
+| Bootloader | Assembly initialization | `0x80000000–0x80000FFF` |
+| Kernel Text | Code and data sections | `0x80001000–0x8001FFFF` |
+| Heap | Dynamic allocations | `0x80020000–...` (grows up) |
+| Stack | Kernel stack | Top-down from high RAM |
+| File Data | In-memory file storage | Custom allocation region |
 
-Contributions are welcome! Areas for improvement:
+- **Heap**: Basic `kmalloc()` allocator with bump pointer
+- **Stack**: Fixed size (4KB-16KB) per execution context
 
-- Additional language support
-- Compiler/assembler integration
-- Network stack implementation
-- Graphics mode support
-- Hardware driver expansion
+### Boot Sequence
+1. **Power-On Reset** - Execution begins at `boot/boot.s`
+2. **Stack Setup** - Initialize stack pointer and clear BSS section  
+3. **Kernel Main** - Control passes to `kernel_main()` in C
+4. **Subsystem Init** - Initialize console/UART, memory manager, filesystem, shell, editor
+5. **Shell Start** - Begin interactive command loop
 
-## License
+### Filesystem Internals
+ChipOS uses an in-memory filesystem (RAMFS-like) with:
+- **File Table**: Flat array of file entries in RAM
+- **File Structure**: `name`, `size`, `start_block`, `flags`, `used`
+- **Operations**: `fs_create`, `fs_delete`, `fs_read`, `fs_write`
+- **Limitations**: No nested directories yet, ~64 file limit (configurable)
 
-This project is open source. See LICENSE file for details.
+### Editor Implementation
 
-## Acknowledgments
+**Basic Editor (`edit`)**
+- Line-based editing with in-memory buffer (`char editor_buffer[MAX_SIZE]`)
+- Commands: `:w` (save), `:q` (quit), `:wq` (save and quit)
+- Syntax highlighting via file extension detection
 
-Built for educational purposes and hardware development workflows. Special thanks to the RISC-V community and open-source toolchain maintainers.
+**VIM-style Editor (`code`)**  
+- Modal editing with cursor navigation
+- Arrow key movement and insert mode
+- Same syntax highlighting engine as basic editor
+
+**Syntax Highlighting Engine**
+- Detects language by file extension
+- Applies ANSI color codes for keywords, comments, strings
+- Supports nested constructs (comments within code blocks)
+
+### Build Configuration
+- **Target**: RISC-V 64-bit (RV64IMAC)
+- **ABI**: LP64
+- **Code Model**: `medany` (position-independent)
+- **Optimization**: `-O2` with debug symbols
+- **Freestanding**: No standard library dependencies
+
+## Development Guide
+
+### Building and Running
+```bash
+# clean build
+make clean && make
+
+# run in QEMU
+qemu-system-riscv64 -machine virt -bios none -kernel build/kernel.bin -nographic
+```
+
+### Sample Workflows
+
+**Creating a C Program**
+```bash
+touch main.c
+code main.c          # Write your C code
+cat main.c           # View with syntax highlighting
+```
+
+**Working with Verilog**
+```bash
+touch alu.v
+edit alu.v           # Create Verilog module
+cat alu.v            # See keyword highlighting
+```
+
+**RISC-V Assembly**
+```bash
+touch program.s
+code program.s       # Write assembly code
+cat program.s        # View with instruction highlighting
+```
+
+### Performance Characteristics
+| Metric | Value |
+|--------|-------|
+| Boot time | ~10ms in QEMU |
+| RAM usage | ~128KB static + dynamic heap |
+| File system | Max 64 entries (configurable) |
+| Editor buffer | ~4KB per file |
+
+### Debugging Tips
+| Issue | Solution |
+|-------|---------|
+| File not opening | Check if `used == 1` and name is valid |
+| Editor crashes | Check buffer overflows or null pointers |
+| Shell unresponsive | Confirm `uart_read` isn't blocked |
+| QEMU freeze | Check for infinite loops or panic triggers |
+
+Use `console_println()` for debug tracing throughout the code.
+
+- **No Persistent Storage**: Files don't survive reboot
+- **Single Process**: No multitasking or process isolation
+- **Limited Memory**: Fixed heap size, no virtual memory
+- **Basic Networking**: No network stack implementation
+- **QEMU Only**: Primarily tested on QEMU, hardware support limited
 
