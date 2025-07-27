@@ -3,10 +3,10 @@
 #include "../fs/fs.h"
 #include "../../lib/string.h"
 
-// Global editor state
+// global editor state
 static editor_state_t editor;
 
-// C Keywords
+// C keywords
 static const char* c_keywords[] = {
     "auto", "break", "case", "char", "const", "continue", "default", "do",
     "double", "else", "enum", "extern", "float", "for", "goto", "if",
@@ -16,7 +16,7 @@ static const char* c_keywords[] = {
     "include", "define", "ifdef", "ifndef", "endif", "pragma", NULL
 };
 
-// Verilog Keywords
+// verilog keywords
 static const char* verilog_keywords[] = {
     "always", "and", "assign", "begin", "buf", "bufif0", "bufif1", "case",
     "casex", "casez", "cmos", "deassign", "default", "defparam", "disable",
@@ -34,7 +34,7 @@ static const char* verilog_keywords[] = {
     "wire", "wor", "xnor", "xor", "logic", "bit", "byte", NULL
 };
 
-// RISC-V Instructions
+// RISC-V instructions
 static const char* riscv_instructions[] = {
     "add", "addi", "sub", "lui", "auipc", "xor", "xori", "or", "ori", "and", "andi",
     "sll", "slli", "srl", "srli", "sra", "srai", "slt", "slti", "sltu", "sltiu",
@@ -46,7 +46,7 @@ static const char* riscv_instructions[] = {
     "amominu.w", "amomaxu.w", NULL
 };
 
-// RISC-V Registers
+// RISC-V registers
 static const char* riscv_registers[] = {
     "x0", "x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9", "x10", "x11",
     "x12", "x13", "x14", "x15", "x16", "x17", "x18", "x19", "x20", "x21", "x22",
@@ -56,7 +56,7 @@ static const char* riscv_registers[] = {
     "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6", "fp", NULL
 };
 
-// Console utility function
+// console utility function
 void console_put_dec(unsigned int value) {
     if (value == 0) {
         console_putchar('0');
@@ -71,7 +71,7 @@ void console_put_dec(unsigned int value) {
         value /= 10;
     }
     
-    // Print digits in reverse order
+    // print digits in reverse order
     while (i > 0) {
         console_putchar(digits[--i]);
     }
@@ -83,7 +83,7 @@ language_t detect_language(const char* filename) {
     int len = strlen(filename);
     if (len < 2) return LANG_PLAIN;
     
-    // Find the last dot in the filename
+    // find the last dot in the filename
     const char* ext = NULL;
     for (int i = len - 1; i >= 0; i--) {
         if (filename[i] == '.') {
@@ -92,15 +92,15 @@ language_t detect_language(const char* filename) {
         }
     }
     
-    // If no extension found, return plain text
+    // if no extension found, return plain text
     if (!ext) return LANG_PLAIN;
     
-    // Debug: Print the detected extension (remove this after testing)
+    // DEBUH: Print the detected extension (remove this after testing)
     console_puts("DEBUG: Detected extension: ");
     console_puts(ext);
     console_puts("\n");
     
-    // Compare extensions (make sure we're comparing the full extension including the dot)
+    // compare extensions (make sure we're comparing the full extension including the dot)
     if (strcmp(ext, ".c") == 0 || strcmp(ext, ".h") == 0) {
         return LANG_C;
     }
@@ -182,7 +182,7 @@ char* extract_word(const char* line, int start, int* end) {
 }
 
 void editor_print_colored(const char* text, token_type_t type) {
-    // Simple color coding using text markers
+    // simple color coding using text markers
     switch (type) {
         case TOKEN_KEYWORD:
             console_puts("[K]");
@@ -234,13 +234,13 @@ void editor_highlight_c(const char* line, int line_num) {
     
     while (i < len) {
         if (line[i] == '/' && i + 1 < len && line[i + 1] == '/') {
-            // Single line comment
+            // single line comment
             char comment[MAX_LINE_LENGTH];
             strcpy(comment, line + i);
             editor_print_colored(comment, TOKEN_COMMENT);
             break;
         } else if (line[i] == '/' && i + 1 < len && line[i + 1] == '*') {
-            // Multi-line comment start
+            // multi-line comment start
             console_puts("[C]/*");
             i += 2;
             while (i < len) {
@@ -253,7 +253,7 @@ void editor_highlight_c(const char* line, int line_num) {
                 i++;
             }
         } else if (line[i] == '"') {
-            // String literal
+            // string literal
             console_puts("[S]\"");
             i++;
             while (i < len && line[i] != '"') {
@@ -267,13 +267,13 @@ void editor_highlight_c(const char* line, int line_num) {
             if (i < len) console_puts("\"[/S]");
             i++;
         } else if (line[i] == '#') {
-            // Preprocessor
+            // preprocessor
             char prep[MAX_LINE_LENGTH];
             strcpy(prep, line + i);
             editor_print_colored(prep, TOKEN_PREPROCESSOR);
             break;
         } else if (is_alpha(line[i])) {
-            // Word (potential keyword)
+            // word (potential keyword)
             int end;
             char* word = extract_word(line, i, &end);
             if (is_c_keyword(word)) {
@@ -283,7 +283,7 @@ void editor_highlight_c(const char* line, int line_num) {
             }
             i = end;
         } else if (is_digit(line[i])) {
-            // Number
+            // number
             char num[32];
             int j = 0;
             while (i < len && (is_digit(line[i]) || line[i] == '.') && j < 31) {
@@ -308,13 +308,13 @@ void editor_highlight_verilog(const char* line, int line_num) {
     
     while (i < len) {
         if (line[i] == '/' && i + 1 < len && line[i + 1] == '/') {
-            // Single line comment
+            // single line comment
             char comment[MAX_LINE_LENGTH];
             strcpy(comment, line + i);
             editor_print_colored(comment, TOKEN_COMMENT);
             break;
         } else if (is_alpha(line[i])) {
-            // Word (potential keyword)
+            // word (potential keyword)
             int end;
             char* word = extract_word(line, i, &end);
             if (is_verilog_keyword(word)) {
@@ -324,7 +324,7 @@ void editor_highlight_verilog(const char* line, int line_num) {
             }
             i = end;
         } else if (is_digit(line[i])) {
-            // Number or bit vector
+            // number or bit vector
             char num[64];
             int j = 0;
             while (i < len && (is_digit(line[i]) || line[i] == '\'' || 
@@ -352,13 +352,13 @@ void editor_highlight_riscv(const char* line, int line_num) {
     
     while (i < len) {
         if (line[i] == '#') {
-            // Comment
+            // comment
             char comment[MAX_LINE_LENGTH];
             strcpy(comment, line + i);
             editor_print_colored(comment, TOKEN_COMMENT);
             break;
         } else if (is_alpha(line[i])) {
-            // Word (instruction or register)
+            // word (instruction or register)
             int end;
             char* word = extract_word(line, i, &end);
             if (is_riscv_instruction(word)) {
@@ -370,7 +370,7 @@ void editor_highlight_riscv(const char* line, int line_num) {
             }
             i = end;
         } else if (is_digit(line[i]) || line[i] == '-') {
-            // Number or immediate
+            // number or immediate
             char num[32];
             int j = 0;
             if (line[i] == '-') num[j++] = line[i++];
@@ -439,7 +439,7 @@ int editor_load_file(const char* filename) {
     int bytes_read = fs_read_file(filename, buffer, sizeof(buffer) - 1);
     
     if (bytes_read < 0) {
-        // New file
+        // new file
         editor.line_count = 1;
         editor.lines[0][0] = '\0';
         return 0;
@@ -448,7 +448,7 @@ int editor_load_file(const char* filename) {
     buffer[bytes_read] = '\0';
     editor.line_count = 0;
     
-    // Parse buffer into lines
+    // parse buffer into lines
     int i = 0, line_pos = 0;
     while (i < bytes_read && editor.line_count < MAX_LINES) {
         if (buffer[i] == '\n' || buffer[i] == '\0') {
@@ -497,7 +497,7 @@ int editor_save_file(void) {
 }
 
 void editor_show_help(void) {
-    console_puts("\033[2J\033[H"); // Clear screen
+    console_puts("\033[2J\033[H"); // clear screen
     console_puts("\n=== ChipOS Editor Help ===\n\n");
     
     console_puts("NAVIGATION:\n");
@@ -552,7 +552,7 @@ void editor_insert_char(char c) {
     int line_len = strlen(editor.lines[editor.cursor_line]);
     
     if (line_len < MAX_LINE_LENGTH - 1) {
-        // Shift characters to the right
+        // shift characters to the right
         for (int i = line_len; i > editor.cursor_col; i--) {
             editor.lines[editor.cursor_line][i] = editor.lines[editor.cursor_line][i-1];
         }
@@ -566,7 +566,7 @@ void editor_insert_char(char c) {
 void editor_delete_char(void) {
     if (editor.cursor_col > 0) {
         int line_len = strlen(editor.lines[editor.cursor_line]);
-        // Shift characters to the left
+        // shift characters to the left
         for (int i = editor.cursor_col - 1; i < line_len; i++) {
             editor.lines[editor.cursor_line][i] = editor.lines[editor.cursor_line][i+1];
         }
@@ -577,22 +577,22 @@ void editor_delete_char(void) {
 
 void editor_new_line(void) {
     if (editor.line_count < MAX_LINES - 1) {
-        // Shift lines down
+        // shift lines down
         for (int i = editor.line_count; i > editor.cursor_line + 1; i--) {
             strcpy(editor.lines[i], editor.lines[i-1]);
         }
         
-        // Split current line
+        // split current line
         editor.line_count++;
         
-        // Copy text after cursor to new line
+        // copy text after cursor to new line
         strcpy(editor.lines[editor.cursor_line + 1], 
                editor.lines[editor.cursor_line] + editor.cursor_col);
         
-        // Truncate current line at cursor
+        // truncate current line at cursor
         editor.lines[editor.cursor_line][editor.cursor_col] = '\0';
         
-        // Move cursor to start of new line
+        // move cursor to start of new line
         editor.cursor_line++;
         editor.cursor_col = 0;
         editor.modified = true;
@@ -600,7 +600,7 @@ void editor_new_line(void) {
 }
 
 int editor_start(const char* filename) {
-    // Initialize editor state
+    // initialize editor state
     memset(&editor, 0, sizeof(editor_state_t));
     strcpy(editor.filename, filename);
     editor.language = detect_language(filename);
@@ -613,12 +613,12 @@ int editor_start(const char* filename) {
     
      char choice = '1';
      
-    // Check if file exists and handle accordingly
+    // check if file exists and handle accordingly
     char buffer[4096];
     int bytes_read = fs_read_file(filename, buffer, sizeof(buffer) - 1);
     
     if (bytes_read >= 0) {
-        // File exists - ask user what to do
+        // file exists - ask user what to do
         console_puts("\n=== File Exists ===\n");
         console_puts("File '");
         console_puts(filename);
@@ -636,39 +636,38 @@ int editor_start(const char* filename) {
         
         switch (choice) {
             case '1':
-                // Load existing content for editing
+                // load existing content for editing
                 console_puts("Loading existing content for editing...\n");
                 editor_load_file(filename);
                 break;
                 
             case '2':
-                // Load existing content, position cursor at end for appending
+                // load existing content, position cursor at end for appending
                 console_puts("Loading file for appending...\n");
                 editor_load_file(filename);
-                // Move cursor to end of last line
+                // move cursor to end of last line
                 editor.cursor_line = editor.line_count - 1;
                 editor.cursor_col = strlen(editor.lines[editor.cursor_line]);
-                // Add a new line if the last line isn't empty
+                // add a new line if the last line isn't empty
                 if (strlen(editor.lines[editor.cursor_line]) > 0) {
                     editor_new_line();
                 }
-                editor.insert_mode = true; // Start in insert mode for appending
+                editor.insert_mode = true; // start in insert mode for appending
                 console_puts("Positioned at end of file. You're now in INSERT mode.\n");
                 break;
                 
             case '3':
-                // Start fresh (don't load existing content)
+                // start fresh (don't load existing content)
                 console_puts("Starting with empty file (existing content will be overwritten when saved)...\n");
                 editor.line_count = 1;
                 editor.lines[0][0] = '\0';
-                editor.modified = true; // Mark as modified since we're discarding content
+                editor.modified = true; // mark as modified since we're discarding content
                 break;
                 
             case '4':
-                // View-only mode
+                // view-only mode
                 console_puts("Opening in read-only mode...\n");
                 editor_load_file(filename);
-                // We'll handle read-only logic in the main loop
                 break;
                 
             default:
@@ -681,7 +680,7 @@ int editor_start(const char* filename) {
         console_getchar();
         
     } else {
-        // New file
+        // new file
         console_puts("Creating new file: ");
         console_puts(filename);
         console_puts("\n");
@@ -689,19 +688,18 @@ int editor_start(const char* filename) {
         editor.lines[0][0] = '\0';
     }
     
-    // Main editor loop 
-
-// Main editor loop - COMPLETE REPLACEMENT for your existing loop
+    // main editor loop 
 char input;
 bool running = true;
 bool read_only = (bytes_read >= 0 && choice == '4');
 
 while (running) {
-    // Clear screen and show editor interface
-    console_puts("\033[2J\033[H"); // Clear screen and move cursor to top
+    // clear screen and show editor interface
     
-    // Show status bar
-    console_puts("\n--- ChipOS Multi-Language Editor ---\n");
+    console_puts("\033[2J\033[H"); // clear screen and move cursor to top
+    
+    // show status bar
+    console_puts("\n--- ChipOS ---\n");
     console_puts("File: ");
     console_puts(editor.filename);
     console_puts(" | Language: ");
@@ -734,13 +732,13 @@ while (running) {
     }
     console_puts("========================================\n");
     
-    // Display file content
+    // display file content
     int end_line = (editor.view_start_line + editor.view_height < editor.line_count) 
                   ? editor.view_start_line + editor.view_height 
                   : editor.line_count;
     
     for (int i = editor.view_start_line; i < end_line; i++) {
-        // Show cursor indicator
+        // show cursor indicator
         if (i == editor.cursor_line) {
             console_puts(">");
         } else {
@@ -749,7 +747,7 @@ while (running) {
         editor_display_line(i, editor.lines[i]);
     }
     
-    // Show current mode and cursor position
+    // show current mode and cursor position
     console_puts("\n");
     if (read_only) {
         console_puts("Mode: VIEW-ONLY");
@@ -763,17 +761,16 @@ while (running) {
     console_put_dec(editor.cursor_col + 1);
     console_puts(" > ");
     
-    // ==== ENHANCED INPUT HANDLING ====
-    // Get user input
+    // get user input
     input = console_getchar();
     
-    // Handle ESC sequences (arrow keys) FIRST - works in ALL modes
+    // handle ESC sequences (arrow keys) - works in ALL modes
     if (input == 27) { // ESC key
         char seq1 = console_getchar();
         if (seq1 == '[') {
             char seq2 = console_getchar();
             
-            // Handle arrow keys
+            // handle arrow keys
             switch (seq2) {
                 case 'A': // UP arrow
                     if (editor.cursor_line > 0) {
@@ -782,12 +779,12 @@ while (running) {
                         if (editor.cursor_col > line_len) {
                             editor.cursor_col = line_len;
                         }
-                        // Adjust view window
+                        // adjust view window
                         if (editor.cursor_line < editor.view_start_line) {
                             editor.view_start_line = editor.cursor_line;
                         }
                     }
-                    continue; // Skip rest of input handling
+                    continue; // skip rest of input handling
                     
                 case 'B': // DOWN arrow  
                     if (editor.cursor_line < editor.line_count - 1) {
@@ -796,7 +793,7 @@ while (running) {
                         if (editor.cursor_col > line_len) {
                             editor.cursor_col = line_len;
                         }
-                        // Adjust view window
+                        // adjust view window
                         if (editor.cursor_line >= editor.view_start_line + editor.view_height) {
                             editor.view_start_line = editor.cursor_line - editor.view_height + 1;
                         }
@@ -820,34 +817,33 @@ while (running) {
             }
         }
         
-        // If we get here, it's a regular ESC key (not arrow sequence)
         // Handle ESC in insert mode only
         if (!read_only && editor.insert_mode) {
             editor.insert_mode = false;
             console_puts("\n[Switched to COMMAND mode]");
         }
-        continue; // Skip rest of input handling
+        continue; 
     }
     
-    // ==== MODE-SPECIFIC INPUT HANDLING ====
+    //  MODE-SPECIFIC INPUT HANDLING
     if (read_only) {
-        // Read-only mode - only allow commands and quit
+        // read-only mode - only allow commands and quit
         switch (input) {
-            case 'j': // Move down (vim-style, but arrow keys work too)
+            case 'j': // move down 
                 if (editor.cursor_line < editor.line_count - 1) {
                     editor.cursor_line++;
                     int line_len = strlen(editor.lines[editor.cursor_line]);
                     if (editor.cursor_col > line_len) {
                         editor.cursor_col = line_len;
                     }
-                    // Adjust view window
+                    // adjust view window
                     if (editor.cursor_line >= editor.view_start_line + editor.view_height) {
                         editor.view_start_line = editor.cursor_line - editor.view_height + 1;
                     }
                 }
                 break;
                 
-            case 'k': // Move up (vim-style)
+            case 'k': // move up 
                 if (editor.cursor_line > 0) {
                     editor.cursor_line--;
                     int line_len = strlen(editor.lines[editor.cursor_line]);
@@ -861,13 +857,13 @@ while (running) {
                 }
                 break;
                 
-            case 'h': // Move left (vim-style)
+            case 'h': // move left 
                 if (editor.cursor_col > 0) {
                     editor.cursor_col--;
                 }
                 break;
                 
-            case 'l': // Move right (vim-style)
+            case 'l': // Move right 
                 {
                     int line_len = strlen(editor.lines[editor.cursor_line]);
                     if (editor.cursor_col < line_len) {
@@ -876,7 +872,7 @@ while (running) {
                 }
                 break;
                 
-            case ':': // Command mode
+            case ':': // command mode
                 console_puts("\nCommand: :");
                 char cmd[16];
                 int cmd_idx = 0;
@@ -902,41 +898,40 @@ while (running) {
         }
         
     } else if (editor.insert_mode) {
-        // Insert mode - handle text input
-        // Note: ESC is now handled above, arrow keys work automatically
+        // insert mode - handle text input
         if (input == '\n' || input == '\r') {
             editor_new_line();
-        } else if (input == 127 || input == 8) { // Backspace/Delete
+        } else if (input == 127 || input == 8) { // backspace/delete
             editor_delete_char();
-        } else if (input >= 32 && input <= 126) { // Printable characters
+        } else if (input >= 32 && input <= 126) { // printable characters
             editor_insert_char(input);
         }
-        // Ignore other control characters
+        // ignore other control characters
         
     } else {
-        // Command mode - handle navigation and commands
+        // command mode - handle navigation and commands
         switch (input) {
-            case 'i': // Enter insert mode
+            case 'i': // enter insert mode
                 editor.insert_mode = true;
                 break;
                 
-            case 'a': // Append (insert at end of line)
+            case 'a': // append (insert at end of line)
                 editor.cursor_col = strlen(editor.lines[editor.cursor_line]);
                 editor.insert_mode = true;
                 break;
                 
-            case 'A': // Append at end of line
+            case 'A': // append at end of line
                 editor.cursor_col = strlen(editor.lines[editor.cursor_line]);
                 editor.insert_mode = true;
                 break;
                 
-            case 'o': // Open new line below
+            case 'o': // open new line below
                 editor.cursor_col = strlen(editor.lines[editor.cursor_line]);
                 editor_new_line();
                 editor.insert_mode = true;
                 break;
                 
-            case 'j': // Move down (vim-style, arrow keys also work)
+            case 'j': // move down
                 if (editor.cursor_line < editor.line_count - 1) {
                     editor.cursor_line++;
                     int line_len = strlen(editor.lines[editor.cursor_line]);
@@ -949,7 +944,7 @@ while (running) {
                 }
                 break;
                 
-            case 'k': // Move up (vim-style)
+            case 'k': // move up 
                 if (editor.cursor_line > 0) {
                     editor.cursor_line--;
                     int line_len = strlen(editor.lines[editor.cursor_line]);
@@ -962,13 +957,13 @@ while (running) {
                 }
                 break;
                 
-            case 'h': // Move left (vim-style)
+            case 'h': // move left
                 if (editor.cursor_col > 0) {
                     editor.cursor_col--;
                 }
                 break;
                 
-            case 'l': // Move right (vim-style)
+            case 'l': // move right 
                 {
                     int line_len = strlen(editor.lines[editor.cursor_line]);
                     if (editor.cursor_col < line_len) {
@@ -977,7 +972,7 @@ while (running) {
                 }
                 break;
                 
-            case 'x': // Delete character under cursor
+            case 'x': // delete character under cursor
                 {
                     int line_len = strlen(editor.lines[editor.cursor_line]);
                     if (editor.cursor_col < line_len) {
@@ -990,7 +985,7 @@ while (running) {
                 }
                 break;
                 
-            case ':': // Command line mode
+            case ':': // command line mode
                 console_puts("\nCommand: :");
                 char cmd[16];
                 int cmd_idx = 0;
@@ -1040,7 +1035,7 @@ while (running) {
                 break;
                 
             default:
-                // Show brief help for unknown keys
+                // show brief help for unknown keys
                 console_puts("\nUnknown key. Press :h for help or 'i' to insert text.");
                 console_puts("\nPress any key to continue...");
                 console_getchar();
