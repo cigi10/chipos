@@ -105,4 +105,4 @@ int fs_getcwd(char* buffer, uint32_t size);
 
 extern filesystem_t fs;
 
-#endif // FS_H
+#endif
