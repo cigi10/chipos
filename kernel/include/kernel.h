@@ -3,13 +3,13 @@
 
 #include "types.h"
 
-// Kernel version information
+// kernel version information
 #define KERNEL_NAME "ChipOS"
 #define KERNEL_VERSION_MAJOR 0
 #define KERNEL_VERSION_MINOR 1
 #define KERNEL_VERSION_PATCH 0
 
-// Kernel configuration
+// kernel configuration
 #define KERNEL_STACK_SIZE (4 * 1024)  // 4KB stack
 #define MAX_INTERRUPTS 32
 
@@ -17,7 +17,7 @@
 #define MSTATUS_MIE  (1 << 3)   // Machine Interrupt Enable
 #define MSTATUS_MPIE (1 << 7)   // Machine Previous Interrupt Enable
 
-// CSR (Control and Status Register) access macros
+// CSR (control and status register) access macros
 #define CSR_READ(csr) ({                    \
     unsigned long __v;                      \
     asm volatile ("csrr %0, " #csr          \
@@ -46,16 +46,16 @@
                   : "memory");              \
 })
 
-// Function prototypes
+// function prototypes
 void kernel_main(void);
 void kernel_panic(const char* message);
 void kernel_print_banner(void);
 
-// Interrupt handling (stub for now)
+// interrupt handling (stub for now)
 typedef void (*interrupt_handler_t)(void);
 void register_interrupt_handler(int irq, interrupt_handler_t handler);
 
-// System information structure
+// system information structure
 typedef struct {
     uint32_t hart_id;
     uint32_t misa;
@@ -65,21 +65,21 @@ typedef struct {
 
 extern system_info_t g_system_info;
 
-// Utility macros
+// utility macros
 #define ALIGN_UP(addr, align) (((addr) + (align) - 1) & ~((align) - 1))
 #define ALIGN_DOWN(addr, align) ((addr) & ~((align) - 1))
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
-// Debugging macros
+// debugging macros
 #ifdef DEBUG
 #define KERNEL_DEBUG(fmt, ...) console_printf("[DEBUG] " fmt, ##__VA_ARGS__)
 #else
 #define KERNEL_DEBUG(fmt, ...)
 #endif
 
-// Assert macro
+// assert macro
 #define KERNEL_ASSERT(condition) do {       \
     if (!(condition)) {                     \
         kernel_panic("Assertion failed: "  \
