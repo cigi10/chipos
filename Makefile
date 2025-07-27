@@ -1,11 +1,10 @@
-# RISC-V OS Build Configuration
 ARCH = riscv64-linux-gnu
 CC = $(ARCH)-gcc
 AS = $(ARCH)-as
 LD = $(ARCH)-ld
 OBJCOPY = $(ARCH)-objcopy
 
-# Compiler flags
+# compiler flags
 CFLAGS = -std=gnu11 -ffreestanding -O2 -Wall -Wextra -mcmodel=medany \
  -Ikernel/include -Ikernel/drivers -Ikernel/shell -Ikernel/editor \
  -Ilib -Ikernel/fs -I. \
@@ -16,7 +15,7 @@ CFLAGS = -std=gnu11 -ffreestanding -O2 -Wall -Wextra -mcmodel=medany \
 ASFLAGS =
 LDFLAGS = -nostdlib
 
-# Directories
+# directories
 BUILD_DIR = build
 KERNEL_DIR = kernel
 DRIVERS_DIR = $(KERNEL_DIR)/drivers
@@ -26,7 +25,7 @@ EDITOR_DIR = $(KERNEL_DIR)/editor
 FS_DIR = $(KERNEL_DIR)/fs
 LIB_DIR = lib
 
-# Source files
+# source files
 ASM_SOURCES = boot/boot.s
 C_SOURCES = $(KERNEL_DIR)/kernel.c \
 $(DRIVERS_DIR)/console.c \
@@ -36,22 +35,22 @@ $(EDITOR_DIR)/editor.c \
 $(FS_DIR)/fs.c \
 $(LIB_DIR)/string.c
 
-# Object files - all in flat build directory
+# object files - all in flat build directory
 OBJECTS = $(addprefix $(BUILD_DIR)/, \
  $(notdir $(ASM_SOURCES:.s=.o)) \
  $(notdir $(C_SOURCES:.c=.o)))
 
-# Final outputs
+# final outputs
 KERNEL_ELF = $(BUILD_DIR)/kernel.elf
 KERNEL_BIN = $(BUILD_DIR)/kernel.bin
 
-# Targets
+# targets
 all: $(KERNEL_BIN)
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
-# Assembly compilation
+# assembly compilation
 $(BUILD_DIR)/%.o: boot/%.s | $(BUILD_DIR)
 	$(AS) $(ASFLAGS) -o $@ $<
 
@@ -77,14 +76,14 @@ $(BUILD_DIR)/%.o: $(FS_DIR)/%.c | $(BUILD_DIR)
 $(BUILD_DIR)/%.o: $(LIB_DIR)/%.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Linking
+# linking
 $(KERNEL_ELF): $(OBJECTS) boot/linker.ld
 	$(LD) $(LDFLAGS) -T boot/linker.ld -o $@ $(OBJECTS)
 
 $(KERNEL_BIN): $(KERNEL_ELF)
 	$(OBJCOPY) -O binary $< $@
 
-# Utilities
+# utilities
 run: $(KERNEL_BIN)
 	qemu-system-riscv64 -machine virt -bios none -kernel $(KERNEL_ELF) -nographic -serial mon:stdio
 
