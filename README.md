@@ -45,7 +45,7 @@ make clean && make
 
 # run in QEMU
 make run
-# Or manually: qemu-system-riscv64 -machine virt -bios none -kernel build/kernel.bin -nographic
+# or manually: qemu-system-riscv64 -machine virt -bios none -kernel build/kernel.bin -nographic
 ```
 
 ## Usage Guide
@@ -131,29 +131,29 @@ rm old_file.c         # remove file
 
 ```
 ChipOS/
-├── boot/               # Boot sequence and initialization
+├── boot/               # boot sequence and initialization
 │   ├── boot.s          # RISC-V assembly bootstrap
-│   └── linker.ld       # Memory layout and linking script
-├── kernel/             # Core kernel components
-│   ├── drivers/        # Hardware abstraction layer
-│   ├── editor/         # Text editing subsystem
-│   ├── fs/             # Filesystem implementation
-│   ├── include/        # Kernel header files
-│   ├── memory/         # Memory management
-│   ├── shell/          # Interactive shell
-│   │   ├── shell.c     # Command interpreter
-│   │   └── shell.h     # Shell interface definitions
-│   └── kernel.c        # Main kernel entry point
-├── lib/                # Utility library
-│   ├── string.c        # String manipulation functions
-│   └── string.h        # String library headers
-├── build/              # Build artifacts
-│   ├── *.o             # Object files (boot, console, editor, etc.)
+│   └── linker.ld       # memory layout and linking script
+├── kernel/             # core kernel components
+│   ├── drivers/        # hardware abstraction layer
+│   ├── editor/         # text editing subsystem
+│   ├── fs/             # filesystem implementation
+│   ├── include/        # kernel header files
+│   ├── memory/         # memory management
+│   ├── shell/          # interactive shell
+│   │   ├── shell.c     # command interpreter
+│   │   └── shell.h     # shell interface definitions
+│   └── kernel.c        # main kernel entry point
+├── lib/                # utility library
+│   ├── string.c        # string manipulation functions
+│   └── string.h        # string library headers
+├── build/              # build artifacts
+│   ├── *.o             # object files (boot, console, editor, etc.)
 │   ├── kernel.elf      # ELF executable with debug symbols
-│   └── kernel.bin      # Final stripped kernel binary
+│   └── kernel.bin      # final stripped kernel binary
 ├── .vscode/            # VS Code configuration
-├── Makefile            # Build system
-└── README.md           # This file
+├── Makefile            # build system
+└── README.md           
 ```
 
 ## Technical Details
@@ -226,22 +226,22 @@ qemu-system-riscv64 -machine virt -bios none -kernel build/kernel.bin -nographic
 **Creating a C Program**
 ```bash
 touch main.c
-code main.c          # Write your C code
-cat main.c           # View with syntax highlighting
+code main.c          # write your C code
+cat main.c           # view with syntax highlighting
 ```
 
 **Working with Verilog**
 ```bash
 touch alu.v
-edit alu.v           # Create Verilog module
-cat alu.v            # See keyword highlighting
+edit alu.v           # create Verilog module
+cat alu.v            # see keyword highlighting
 ```
 
 **RISC-V Assembly**
 ```bash
 touch program.s
-code program.s       # Write assembly code
-cat program.s        # View with instruction highlighting
+code program.s       # write assembly code
+cat program.s        # view with instruction highlighting
 ```
 
 ### Performance Characteristics
