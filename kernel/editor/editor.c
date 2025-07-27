@@ -817,7 +817,7 @@ while (running) {
             }
         }
         
-        // Handle ESC in insert mode only
+        // handle ESC in insert mode only
         if (!read_only && editor.insert_mode) {
             editor.insert_mode = false;
             console_puts("\n[Switched to COMMAND mode]");
