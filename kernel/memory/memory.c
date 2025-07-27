@@ -3,22 +3,22 @@
 #include "../include/kernel.h"
 #include "../../lib/string.h"
 
-// Simple heap allocator constants
+// heap allocator constants
 #define HEAP_SIZE (1024 * 1024)  // 1MB heap
 #define MIN_BLOCK_SIZE 32
 #define BLOCK_HEADER_SIZE sizeof(block_header_t)
 
-// Forward declarations for static functions
+// declarations for static functions
 static block_header_t* find_free_block(size_t size);
 static void split_block(block_header_t* block, size_t size);
 static void merge_free_blocks(void);
 
-// Global heap memory (static allocation for simplicity)
+// global heap memory (static allocation for simplicity)
 static char heap_memory[HEAP_SIZE];
 static block_header_t* heap_start = NULL;
 static int memory_initialized = 0;
 
-// Statistics
+// statistics
 static memory_stats_t stats = {0};
 
 void memory_init(void) {
@@ -56,36 +56,34 @@ void* kmalloc(size_t size) {
         return NULL;
     }
     
-    // Align size to 8-byte boundary
+    // align size to 8-byte boundary
     size = (size + 7) & ~7;
     
-    // Ensure minimum block size
+    // ensure minimum block size
     if (size < MIN_BLOCK_SIZE) {
         size = MIN_BLOCK_SIZE;
     }
     
-    // Try to find an existing free block
     block_header_t* block = find_free_block(size);
     
     if (!block) {
-        // No suitable block found
         return NULL;
     }
     
-    // Split the block if it's much larger than needed
+    // split the block if it's much larger than needed
     if (block->size > size + BLOCK_HEADER_SIZE + MIN_BLOCK_SIZE) {
         split_block(block, size);
     }
     
-    // Mark block as used
+    // mark block as used
     block->is_free = 0;
     
-    // Update statistics
+    // update statistics
     stats.used_memory += block->size + BLOCK_HEADER_SIZE;
     stats.free_memory -= block->size + BLOCK_HEADER_SIZE;
     stats.num_allocations++;
     
-    // Return pointer to data (after header)
+    // return pointer to data (after header)
     return (char*)block + BLOCK_HEADER_SIZE;
 }
 
@@ -94,10 +92,10 @@ void kfree(void* ptr) {
         return;
     }
     
-    // Get the block header
+    // get the block header
     block_header_t* block = (block_header_t*)((char*)ptr - BLOCK_HEADER_SIZE);
     
-    // Validate the block (basic sanity check)
+    // validate the block
     if ((char*)block < heap_memory || 
         (char*)block >= heap_memory + HEAP_SIZE ||
         block->is_free) {
@@ -105,15 +103,15 @@ void kfree(void* ptr) {
         return;
     }
     
-    // Mark as free
+    // mark block as free
     block->is_free = 1;
     
-    // Update statistics
+    // update statistics
     stats.used_memory -= block->size + BLOCK_HEADER_SIZE;
     stats.free_memory += block->size + BLOCK_HEADER_SIZE;
     stats.num_allocations--;
     
-    // Merge adjacent free blocks
+    // merge adjacent free blocks
     merge_free_blocks();
 }
 
@@ -139,7 +137,7 @@ void memory_print_info(void) {
     console_put_hex(stats.num_free_blocks);
     console_puts("\n");
     
-    // Show fragmentation info
+    // show fragmentation info
     console_puts("Heap utilization: ");
     if (stats.total_memory > 0) {
         uint32_t utilization = (stats.used_memory * 100) / stats.total_memory;
@@ -151,7 +149,7 @@ void memory_print_info(void) {
 }
 
 memory_stats_t memory_get_stats(void) {
-    // Update free block count
+    // update free block count
     stats.num_free_blocks = 0;
     block_header_t* current = heap_start;
     
@@ -165,7 +163,7 @@ memory_stats_t memory_get_stats(void) {
     return stats;
 }
 
-// Internal helper functions
+// internal helper functions
 static block_header_t* find_free_block(size_t size) {
     block_header_t* current = heap_start;
     
@@ -181,17 +179,17 @@ static block_header_t* find_free_block(size_t size) {
 
 static void split_block(block_header_t* block, size_t size) {
     if (block->size <= size + BLOCK_HEADER_SIZE + MIN_BLOCK_SIZE) {
-        // Block is too small to split
+        // block is too small to split
         return;
     }
     
-    // Create new block for the remaining space
+    // create new block for the remaining space
     block_header_t* new_block = (block_header_t*)((char*)block + BLOCK_HEADER_SIZE + size);
     new_block->size = block->size - size - BLOCK_HEADER_SIZE;
     new_block->is_free = 1;
     new_block->next = block->next;
     
-    // Update current block
+    // update current block
     block->size = size;
     block->next = new_block;
 }
@@ -201,15 +199,15 @@ static void merge_free_blocks(void) {
     
     while (current && current->next) {
         if (current->is_free && current->next->is_free) {
-            // Check if blocks are adjacent
+            // check if blocks are adjacent
             char* current_end = (char*)current + BLOCK_HEADER_SIZE + current->size;
             char* next_start = (char*)current->next;
             
             if (current_end == next_start) {
-                // Merge the blocks
+                // merge the blocks
                 current->size += BLOCK_HEADER_SIZE + current->next->size;
                 current->next = current->next->next;
-                continue; // Don't advance current, check for more merges
+                continue; // don't advance current, check for more merges
             }
         }
         current = current->next;
