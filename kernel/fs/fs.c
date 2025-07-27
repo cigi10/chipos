@@ -17,16 +17,16 @@ int fs_init(void) {
     fs.files[0].type = FILE_TYPE_DIRECTORY;
     fs.files[0].size = 0;
     fs.files[0].permissions = PERM_READ | PERM_WRITE | PERM_EXEC;
-    fs.files[0].parent_id = 0;  // Root is its own parent
+    fs.files[0].parent_id = 0;  
     fs.files[0].created_time = system_time++;
     fs.files[0].modified_time = system_time;
     fs.files[0].data_offset = 0;
     
     // initialize filesystem metadata
-    fs.file_count = 1;          // Start with 1 (root directory)
-    fs.current_dir = 0;         // Start in root directory
-    fs.root_dir = 0;            // Root directory ID
-    fs.next_file_id = 1;        // Next available file ID
+    fs.file_count = 1;          // start with 1 (root directory)
+    fs.current_dir = 0;         // start in root directory
+    fs.root_dir = 0;            // root directory ID
+    fs.next_file_id = 1;        // next available file ID
     strcpy(fs.current_path, "/");
     fs.data_usage = 0;
     
