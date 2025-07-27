@@ -39,7 +39,7 @@ Built as a microkernel with modular components, ChipOS offers a practical platfo
 sudo apt install gcc-riscv64-linux-gnu qemu-system-misc
 
 # clone and build
-git clone https://github.com/yourusername/chipos.git
+git clone https://github.com/cigi10/chipos.git
 cd chipos
 make clean && make
 
