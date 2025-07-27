@@ -3,7 +3,6 @@
 
 #include "../include/types.h"
 
-// Language types for syntax highlighting
 typedef enum {
     LANG_PLAIN,
     LANG_C,
@@ -13,7 +12,6 @@ typedef enum {
     LANG_UNKNOWN
 } language_t;
 
-// Token types for syntax highlighting
 typedef enum {
     TOKEN_NORMAL,
     TOKEN_KEYWORD,
@@ -22,18 +20,16 @@ typedef enum {
     TOKEN_NUMBER,
     TOKEN_OPERATOR,
     TOKEN_PREPROCESSOR,
-    TOKEN_SIGNAL,        // Verilog signals
-    TOKEN_MODULE,        // Verilog modules
-    TOKEN_REGISTER,      // RISC-V registers
-    TOKEN_INSTRUCTION    // RISC-V instructions
+    TOKEN_SIGNAL,        
+    TOKEN_MODULE,       
+    TOKEN_REGISTER,     
+    TOKEN_INSTRUCTION   
 } token_type_t;
 
-// Editor configuration
 #define MAX_LINES 1000
 #define MAX_LINE_LENGTH 256
 #define TAB_SIZE 4
 
-// Editor state structure
 typedef struct {
     char filename[256];
     char lines[MAX_LINES][MAX_LINE_LENGTH];
@@ -47,7 +43,6 @@ typedef struct {
     language_t language;
 } editor_state_t;
 
-// Function prototypes
 language_t detect_language(const char* filename);
 bool is_c_keyword(const char* word);
 bool is_verilog_keyword(const char* word);
