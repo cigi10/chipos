@@ -16,7 +16,7 @@ static char command_history[HISTORY_SIZE][MAX_COMMAND_LENGTH];
 static int history_count = 0;
 
 
-// ANSI Color codes for syntax highlighting
+// ANSI color codes for syntax highlighting
 #define ANSI_COLOR_RED     "\033[31m"
 #define ANSI_COLOR_GREEN   "\033[32m"
 #define ANSI_COLOR_YELLOW  "\033[33m"
@@ -39,20 +39,19 @@ static const char* valid_commands[] = {
     "grep", "exit", "quit", NULL
 };
 
-// Forward declarations for helper functions
+// declarations for helper functions
 static void display_line_with_highlighting(const char* line, const char* ext);
 static void highlight_word(const char* word, const char* ext);
 static const char* get_file_extension(const char* filename);
 static char* simple_strtok(char* str, const char* delim) __attribute__((unused));
 
-// Command structure
 typedef struct {
     const char* name;
     const char* description;
     void (*handler)(int argc, char* argv[]);
 } command_t;
 
-// Forward declarations for commands
+// declarations for commands
 static void cmd_help(int argc, char* argv[]);
 static void cmd_about(int argc, char* argv[]);
 static void cmd_mem(int argc, char* argv[]);
@@ -85,8 +84,6 @@ static int parse_command(char* input, char* args[], int max_args);
 static void execute_command(int argc, char* argv[]);
 static int simple_atoi(const char* str);
 
-
-// Verilog keywords
 static const char* verilog_keywords[] = {
     "module", "endmodule", "input", "output", "inout", "wire", "reg", "parameter",
     "always", "initial", "begin", "end", "if", "else", "case", "endcase",
@@ -99,7 +96,6 @@ static const char* verilog_keywords[] = {
     NULL
 };
 
-// C keywords
 static const char* c_keywords[] = {
     "int", "char", "float", "double", "void", "long", "short", "unsigned",
     "signed", "const", "static", "volatile", "extern", "auto", "register",
@@ -109,7 +105,6 @@ static const char* c_keywords[] = {
     NULL
 };
 
-// Assembly keywords (RISC-V)
 static const char* asm_keywords[] = {
     "add", "sub", "mul", "div", "and", "or", "xor", "sll", "srl", "sra",
     "beq", "bne", "blt", "bge", "bltu", "bgeu", "jal", "jalr", "lui", "auipc",
@@ -127,7 +122,7 @@ static const char* asm_keywords[] = {
     NULL
 };
 
-// Command table with basic commands (removing undefined ones for now)
+// command table  
 static command_t commands[] = {
     {"help", "Show available commands", cmd_help},
     {"about", "Show system information", cmd_about},
@@ -160,9 +155,6 @@ static command_t commands[] = {
     {NULL, NULL, NULL} // Sentinel
 };
 
-// Simple strtok implementation since it's not in your string library
-
-// Add this validation function
 static bool is_valid_command(const char* cmd) {
     if (!cmd || strlen(cmd) == 0) {
         return false;
@@ -185,8 +177,7 @@ static char* simple_strtok(char* str, const char* delim) {
     } else if (last_pos == NULL) {
         return NULL;
     }
-    
-    // Skip leading delimiters
+
     while (*last_pos && strchr(delim, *last_pos)) {
         last_pos++;
     }
@@ -197,8 +188,7 @@ static char* simple_strtok(char* str, const char* delim) {
     }
     
     start = last_pos;
-    
-    // Find next delimiter
+
     while (*last_pos && !strchr(delim, *last_pos)) {
         last_pos++;
     }
@@ -226,11 +216,9 @@ void shell_run(void) {
     int argc;
     
     while (1) {
-        // Enhanced prompt showing current path
         char current_path[MAX_PATH_LENGTH];
         if (fs_get_current_path(current_path, sizeof(current_path)) == FS_SUCCESS) {
-            // Create dynamic prompt string
-            char prompt[MAX_PATH_LENGTH + 32]; // Extra for hex ID
+            char prompt[MAX_PATH_LENGTH + 32]; 
             char dir_id_hex[16];
             itoa(fs_get_current_dir_id(), dir_id_hex, 16);
             strcpy(prompt, "chip:");
@@ -240,22 +228,17 @@ void shell_run(void) {
             strcat(prompt, "]$ ");
             console_prompt(prompt);
         } else {
-            // Fallback to original prompt if path retrieval fails
             console_prompt("chip> ");
         }
         
-        // Get user input WITH HISTORY
         console_gets_with_history(input_buffer, MAX_COMMAND_LENGTH);
         
-        // Skip empty lines
         if (strlen(input_buffer) == 0) {
             continue;
         }
-        
-        // Parse command into arguments
+    
         argc = parse_command(input_buffer, args, MAX_ARGS);
         if (argc > 0) {
-            // Find and execute command
             execute_command(argc, args);
         }
     }
@@ -265,9 +248,9 @@ static int parse_command(char* input, char* args[], int max_args) {
     int argc = 0;
     char* token = input;
     
-    // Simple tokenization by spaces
+    // simple tokenization by spaces
     while (*token && argc < max_args) {
-        // Skip leading spaces
+        // skip leading spaces
         while (*token == ' ' || *token == '\t') {
             token++;
         }
@@ -276,16 +259,16 @@ static int parse_command(char* input, char* args[], int max_args) {
             break;
         }
         
-        // Mark start of argument
+        // mark start of argument
         args[argc] = token;
         argc++;
         
-        // Find end of argument
+        // gind end of argument
         while (*token && *token != ' ' && *token != '\t') {
             token++;
         }
         
-        // Null-terminate if not at end of string
+        // null-terminate if not at end of string
         if (*token) {
             *token = '\0';
             token++;
@@ -296,7 +279,7 @@ static int parse_command(char* input, char* args[], int max_args) {
 }
 
 static int is_likely_accidental_input(const char* input) {
-    // Common C keywords that users might accidentally type
+    // common C keywords that users might accidentally type
     const char* c_keywords[] = {
         "int", "char", "void", "if", "else", "for", "while", "do", "switch", 
         "case", "break", "continue", "return", "struct", "union", "enum",
@@ -304,39 +287,39 @@ static int is_likely_accidental_input(const char* input) {
         "unsigned", "signed", "long", "short", "double", "float", NULL
     };
     
-    // Check if it's a single C keyword
+    // check if it's a single C keyword
     for (int i = 0; c_keywords[i] != NULL; i++) {
         if (strcmp(input, c_keywords[i]) == 0) {
             return 1;
         }
     }
     
-    // Check if it's obviously not a command (single letters, numbers, etc.)
+    // check if it's obviously not a command (single letters, numbers, etc.)
     if (strlen(input) == 1) {
-        return 1;  // Single characters are probably accidents
+        return 1;  // single characters are probably accidents
     }
     
-    return 0;  // Treat as a real command attempt
+    return 0;  // treat as a real command attempt
 }
 
 static void execute_command(int argc, char* argv[]) {
     if (argc == 0) return;
     
     if (!is_valid_command(argv[0])) {
-        // Check if it's likely accidental input
+        // check if it's likely accidental input
         if (is_likely_accidental_input(argv[0])) {
-            // Silently ignore obvious non-commands
+            // silently ignore obvious non-commands
             return;
         }
         
-        // For actual command attempts, show error
+        // for actual command attempts, show error
         console_puts("Unknown command: ");
         console_puts(argv[0]);
         console_puts("\nType 'help' for available commands.\n");
         return;
     }
     
-    // Execute the valid command
+    // execute the valid command
     for (int i = 0; commands[i].name != NULL; i++) {
         if (strcmp(argv[0], commands[i].name) == 0) {
             commands[i].handler(argc, argv);
@@ -345,14 +328,12 @@ static void execute_command(int argc, char* argv[]) {
     }
 }
 
-// Helper function to get file extension
 static const char* get_file_extension(const char* filename) {
     const char* dot = strrchr(filename, '.');
     if (!dot || dot == filename) return "";
     return dot;
 }
 
-// Helper function for simple string to integer conversion
 static int simple_atoi(const char* str) {
     int result = 0;
     int sign = 1;
@@ -409,9 +390,9 @@ static void highlight_word(const char* word, const char* ext) {
     }
 }
 
-// Enhanced syntax highlighting function for multiple languages
+// syntax highlighting function for multiple languages
 static void display_line_with_highlighting(const char* line, const char* ext) {
-    console_puts("    "); // Indentation
+    console_puts("    "); // indentation
     
     if (!ext) {
         console_puts(line);
@@ -472,7 +453,7 @@ static void display_line_with_highlighting(const char* line, const char* ext) {
             }
         }
     }
-    // Verilog syntax highlighting
+    // verilog syntax highlighting
     else if (strcmp(ext, ".v") == 0 || strcmp(ext, ".sv") == 0) {
         if (strstr(line, "//")) {
             char* comment_start = strstr(line, "//");
@@ -516,7 +497,7 @@ static void display_line_with_highlighting(const char* line, const char* ext) {
             }
         }
     }
-    // Assembly syntax highlighting
+    // assembly syntax highlighting
     else if (strcmp(ext, ".s") == 0 || strcmp(ext, ".asm") == 0) {
         if (strstr(line, "#") || strstr(line, ";")) {
             char* comment_start = strstr(line, "#");
@@ -564,7 +545,7 @@ static void display_line_with_highlighting(const char* line, const char* ext) {
     console_puts("\n");
 }
 
-// COMMAND IMPLEMENTATIONS
+// command implementations
 
 static void cmd_help(int argc __attribute__((unused)), char* argv[] __attribute__((unused))) {
     console_println("\nChipOS Multi-Language Development Shell");
@@ -596,10 +577,8 @@ static void cmd_help(int argc __attribute__((unused)), char* argv[] __attribute_
 }
 
 static void cmd_about(int argc __attribute__((unused)), char* argv[] __attribute__((unused))) {
-    console_println("\nChipOS v0.2.0 - Multi-Language Development Edition");
+    console_println("\nChipOS");
     console_println("==================================================");
-    console_println("A specialized RISC-V operating system for hardware development");
-    console_println("Designed for ECE students and embedded systems engineers");
     console_println("");
     console_println("Features:");
     console_println("• Multi-language syntax highlighting (C, Verilog, Assembly)");
@@ -657,7 +636,7 @@ static void cmd_calc(int argc, char* argv[]) {
 
 static void cmd_clear(int argc __attribute__((unused)), char* argv[] __attribute__((unused))) {
     console_puts("\033[2J\033[H");
-    console_println("ChipOS - Multi-Language Development Environment");
+    console_println("ChipOS");
 }
 
 static void cmd_echo(int argc, char* argv[]) {
@@ -714,7 +693,7 @@ static void cmd_colortest(int argc __attribute__((unused)), char* argv[] __attri
     display_line_with_highlighting("    ret                # Return", ".s");
 }
 
-// File system command implementations
+// file system command implementations
 
 void cmd_ls(int argc, char** argv) {
     bool long_listing = false;
@@ -725,7 +704,7 @@ void cmd_ls(int argc, char** argv) {
         if (strcmp(argv[i], "-l") == 0) {
             long_listing = true;
         } else {
-            path = argv[i]; // Assume anything else is a path
+            path = argv[i]; // assume anything else is a path
         }
     }
 
@@ -751,7 +730,6 @@ static void cmd_cd(int argc, char* argv[]) {
         return;
     }
     
-    // DEBUG: Show the actual argument received
     console_puts("DEBUG: Raw argument received: '");
     console_puts(argv[1]);
     console_puts("' (length: ");
@@ -787,7 +765,7 @@ static void cmd_mkdir(int argc, char* argv[]) {
         console_println("Usage: mkdir <directory>");
         return;
     }
-    // FIX: Use correct function name from fs.c
+
     if (fs_make_directory(argv[1]) != 0) {
         console_puts("mkdir: cannot create directory '");
         console_puts(argv[1]);
@@ -819,9 +797,6 @@ static void cmd_rm(int argc, char* argv[]) {
     }
 }
 
-// REMOVE THIS ENTIRE FAKE FUNCTION - it's causing the mkdir bug!
-// Delete the fs_create_directory() function from your shell.c completely
-
 static void cmd_cat(int argc, char* argv[]) {
     if (argc < 2) {
         console_println("Usage: cat <file>");
@@ -838,7 +813,7 @@ static void cmd_cat(int argc, char* argv[]) {
         return;
     }
     
-    buffer[bytes_read] = '\0'; // Ensure null termination
+    buffer[bytes_read] = '\0'; 
     const char* ext = get_file_extension(argv[1]);
     
     console_puts("File: ");
@@ -846,7 +821,6 @@ static void cmd_cat(int argc, char* argv[]) {
     console_println("");
     console_println("----------------------------------------");
     
-    // Parse lines manually since strtok isn't available
     char line[256];
     int line_pos = 0;
     int buffer_pos = 0;
@@ -864,7 +838,6 @@ static void cmd_cat(int argc, char* argv[]) {
         buffer_pos++;
     }
     
-    // Handle last line if it doesn't end with newline
     if (line_pos > 0) {
         line[line_pos] = '\0';
         display_line_with_highlighting(line, ext);
@@ -953,8 +926,6 @@ static void cmd_find(int argc, char* argv[]) {
     console_puts(argv[1]);
     console_println("'...");
     
-    // This is a basic implementation - in a real system you'd recursively search
-    // For now, just check if the file exists in current directory
     char buffer[256];
     if (fs_read_file(argv[1], buffer, 1) >= 0) {
         console_puts("Found: ./");
@@ -988,7 +959,7 @@ static void cmd_grep(int argc, char* argv[]) {
     
     buffer[bytes_read] = '\0';
     
-    // Simple line-based search
+    // simple line-based search
     char line[256];
     int line_pos = 0;
     int buffer_pos = 0;
@@ -999,7 +970,6 @@ static void cmd_grep(int argc, char* argv[]) {
         if (buffer[buffer_pos] == '\n' || buffer[buffer_pos] == '\0') {
             line[line_pos] = '\0';
             
-            // Check if pattern exists in this line
             if (strstr(line, pattern) != NULL) {
                 console_put_hex(line_number);
                 console_puts(": ");
@@ -1043,7 +1013,7 @@ static void cmd_edit(int argc, char* argv[]) {
     console_println("  (empty line) - finish editing and save");
     console_println("----------------------------------------");
     
-    // Read existing content if file exists
+    // read existing content if file exists
     char file_buffer[MAX_FILE_SIZE];
     int existing_size = fs_read_file(filename, file_buffer, MAX_FILE_SIZE - 1);
     int total_size = 0;
@@ -1052,7 +1022,7 @@ static void cmd_edit(int argc, char* argv[]) {
         file_buffer[existing_size] = '\0';
         console_println("Existing content:");
         
-        // Display with syntax highlighting
+        // display with syntax highlighting
         char line[256];
         int line_pos = 0;
         
@@ -1076,7 +1046,7 @@ static void cmd_edit(int argc, char* argv[]) {
         total_size = existing_size;
     }
     
-    // Edit loop
+    // edit loop
     char input_line[256];
     int should_save = 1;
     
@@ -1084,13 +1054,13 @@ static void cmd_edit(int argc, char* argv[]) {
         console_puts("> ");
         console_gets(input_line, 256);
         
-        // Check for editor commands
+        // check for editor commands
         if (strcmp(input_line, ":q") == 0) {
             console_println("Quit without saving");
             should_save = 0;
             break;
         } else if (strcmp(input_line, ":w") == 0) {
-            // Save current buffer
+            // save current buffer
             if (fs_write_file(filename, file_buffer, total_size) == 0) {
                 console_println("File saved");
             } else {
@@ -1101,29 +1071,29 @@ static void cmd_edit(int argc, char* argv[]) {
             console_println("Save and quit");
             break;
         } else if (strlen(input_line) == 0) {
-            // Empty line - finish editing
+            // empty line - finish editing
             console_println("Finished editing");
             break;
         }
         
-        // Add line to buffer
+        // add line to buffer
         int line_len = strlen(input_line);
         if (total_size + line_len + 1 < MAX_FILE_SIZE) {
-            // Copy line to buffer
+            // copy line to buffer
             for (int i = 0; i < line_len; i++) {
                 file_buffer[total_size + i] = input_line[i];
             }
             file_buffer[total_size + line_len] = '\n';
             total_size += line_len + 1;
             
-            // Show the line with syntax highlighting
+            // show the line with syntax highlighting
             display_line_with_highlighting(input_line, ext);
         } else {
             console_println("Warning: File buffer full, line not added");
         }
     }
     
-    // Save file if requested
+    // save file
     if (should_save) {
         if (fs_write_file(filename, file_buffer, total_size) == 0) {
             console_puts("File '");
@@ -1151,7 +1121,7 @@ static void cmd_code(int argc, char* argv[]) {
     console_puts(filename);
     console_println("");
     
-    // Show language-specific info
+    // show language-specific info
     if (ext && (strcmp(ext, ".c") == 0 || strcmp(ext, ".h") == 0)) {
         console_println("Language: C/C++");
         console_println("Features: Keyword highlighting, syntax checking");
@@ -1169,7 +1139,6 @@ static void cmd_code(int argc, char* argv[]) {
     console_println("         :w - save, :q - quit, :wq - save and quit");
     console_println("========================================");
     
-    // Use the advanced editor with full vim-style features
     editor_start(filename);
 }
 
@@ -1187,7 +1156,6 @@ static void cmd_compile(int argc, char* argv[]) {
     console_puts(filename);
     console_println("");
     
-    // Check if file exists
     char buffer[256];
     if (fs_read_file(filename, buffer, 1) < 0) {
         console_puts("Error: Source file '");
@@ -1228,7 +1196,7 @@ static void cmd_run(int argc, char* argv[]) {
     console_println("");
     console_println("========================================");
     
-    // Check if it's a common program name
+    // check if it's a common program name
     if (strcmp(program, "a.out") == 0) {
         console_println("Hello, ChipOS World!");
         console_println("Program executed successfully");
@@ -1241,7 +1209,7 @@ static void cmd_run(int argc, char* argv[]) {
         console_println("Object file executed");
         console_println("RISC-V program completed");
     } else {
-        // Try to find and execute the file
+        // try to find and execute the file
         char buffer[256];
         if (fs_read_file(program, buffer, 256) >= 0) {
             console_println("Script/program found and executed");
@@ -1285,7 +1253,7 @@ static void cmd_syntax(int argc, char* argv[]) {
     console_println("----------------------");
     
     if (ext && (strcmp(ext, ".c") == 0 || strcmp(ext, ".h") == 0)) {
-        // Basic C syntax checking
+        // basic C syntax checking
         int brace_count = 0;
         int paren_count = 0;
         int line_num = 1;
@@ -1322,14 +1290,14 @@ static void cmd_syntax(int argc, char* argv[]) {
     } else if (ext && (strcmp(ext, ".v") == 0 || strcmp(ext, ".sv") == 0)) {
         console_println("Verilog syntax check:");
         
-        // Check for basic Verilog structure
+        // check for basic Verilog structure
         if (strstr(buffer, "module") && strstr(buffer, "endmodule")) {
             console_println("✓ Module structure found");
         } else {
             console_println("✗ Missing module/endmodule");
         }
         
-        // Check for begin/end balance
+        // check for begin/end balance
         char* ptr = buffer;
         int begin_count = 0;
         while ((ptr = strstr(ptr, "begin")) != NULL) {
@@ -1340,7 +1308,7 @@ static void cmd_syntax(int argc, char* argv[]) {
         ptr = buffer;
         int end_count = 0;
         while ((ptr = strstr(ptr, "end")) != NULL) {
-            // Make sure it's not "endmodule"
+            
             if (strncmp(ptr, "endmodule", 9) != 0) {
                 end_count++;
             }
@@ -1357,7 +1325,7 @@ static void cmd_syntax(int argc, char* argv[]) {
         console_println("Assembly syntax check:");
         console_println("✓ Assembly file format");
         
-        // Count instructions vs directives
+        // count instructions vs directives
         int instruction_count = 0;
         int directive_count = 0;
         
@@ -1368,7 +1336,7 @@ static void cmd_syntax(int argc, char* argv[]) {
             if (buffer[i] == '\n' || buffer[i] == '\0') {
                 line[line_pos] = '\0';
                 
-                // Skip empty lines and comments
+                // skipa empty lines and comments
                 if (line_pos > 0 && line[0] != '#' && line[0] != ';') {
                     if (line[0] == '.') {
                         directive_count++;
@@ -1402,7 +1370,6 @@ static void cmd_syntax(int argc, char* argv[]) {
 
 static void cmd_exit(int argc __attribute__((unused)), char* argv[] __attribute__((unused))) {
     console_println("Goodbye!");
-    // Add your exit logic here
 }
 
 static void cmd_quit(int argc __attribute__((unused)), char* argv[] __attribute__((unused))) {
@@ -1415,7 +1382,6 @@ static void cmd_touch(int argc, char* argv[]) {
         return;
     }
     
-    // Check if file already exists
     char buffer[1];
     if (fs_read_file(argv[1], buffer, 1) >= 0) {
         console_puts("File '");
@@ -1424,7 +1390,6 @@ static void cmd_touch(int argc, char* argv[]) {
         return;
     }
     
-    // Create empty file
     if (fs_write_file(argv[1], "", 0) == 0) {
         console_puts("Created file '");
         console_puts(argv[1]);
@@ -1448,7 +1413,7 @@ void console_gets_with_history(char* buffer, int max_len) {
             buffer[pos] = '\0';
             console_putc('\n');
             
-            // Add to history if not empty
+            // add to history if not empty
             if (pos > 0) {
                 strcpy(command_history[history_count % HISTORY_SIZE], buffer);
                 history_count++;
@@ -1468,7 +1433,7 @@ void console_gets_with_history(char* buffer, int max_len) {
                         current_history = (current_history - 1 + HISTORY_SIZE) % HISTORY_SIZE;
                     }
                     
-                    // Clear line and show history
+                    // clear line and show history
                     for (int i = 0; i < pos; i++) console_putc('\b');
                     strcpy(buffer, command_history[current_history]);
                     pos = strlen(buffer);
@@ -1478,11 +1443,11 @@ void console_gets_with_history(char* buffer, int max_len) {
                     if (current_history != -1) {
                         current_history = (current_history + 1) % HISTORY_SIZE;
                         
-                        // Clear line
+                        // clear line
                         for (int i = 0; i < pos; i++) console_putc('\b');
                         
                         if (current_history == history_count % HISTORY_SIZE) {
-                            strcpy(buffer, temp_buffer); // Restore original
+                            strcpy(buffer, temp_buffer); // restore original
                             current_history = -1;
                         } else {
                             strcpy(buffer, command_history[current_history]);
@@ -1493,7 +1458,7 @@ void console_gets_with_history(char* buffer, int max_len) {
                 }
             }
         }
-        else if (c == '\b' || c == 127) { // Backspace
+        else if (c == '\b' || c == 127) { // backspace
             if (pos > 0) {
                 pos--;
                 console_putc('\b');
