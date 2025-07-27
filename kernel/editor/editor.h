@@ -67,4 +67,4 @@ void editor_new_line(void);
 int editor_start(const char* filename);
 void console_put_dec(unsigned int value);
 
-#endif // EDITOR_H
+#endif 
