@@ -47,11 +47,11 @@ char* strcpy(char* dest, const char* src) {
 
 char* strcat(char* dest, const char* src) {
     char* original_dest = dest;
-    // Find the end of dest
+    // find the end of dest
     while (*dest != '\0') {
         dest++;
     }
-    // Copy src to the end of dest
+    // copy src to the end of dest
     while (*src != '\0') {
         *dest = *src;
         dest++;
@@ -84,8 +84,6 @@ char* strstr(const char* haystack, const char* needle) {
     
     return (void*)0;
 }
-
-// Added missing strrchr function
 char* strrchr(const char* str, int c) {
     char* last_occurrence = (void*)0;
     
@@ -96,7 +94,6 @@ char* strrchr(const char* str, int c) {
         str++;
     }
     
-    // Check if we're looking for the null terminator
     if (c == '\0') {
         return (char*)str;
     }
@@ -166,13 +163,11 @@ char* strtok(char* str, const char* delim) {
     if (str) next = str;
     if (!next) return NULL;
 
-    // Skip leading delimiters
     while (*next && strchr(delim, *next)) next++;
     if (!*next) return NULL;
 
     char* start = next;
 
-    // Find end of token
     while (*next && !strchr(delim, *next)) next++;
     if (*next) {
         *next = '\0';
