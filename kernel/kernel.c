@@ -7,7 +7,6 @@
 #include "../lib/string.h"
 #include "../editor/editor.h"
 
-// Global system information
 system_info_t g_system_info = {0};
 
 void kernel_panic(const char* message) {
@@ -18,13 +17,13 @@ void kernel_panic(const char* message) {
 
     CSR_CLEAR(mstatus, MSTATUS_MIE);
     while(1) {
-        asm volatile ("wfi"); // Wait for interrupt (low power)
+        asm volatile ("wfi"); 
     }
 }
 
 void kernel_print_banner(void) {
     console_println("=================================");
-    console_println("    ChipOS v0.1.0 - RISC-V    ");
+    console_println("        ChipOS       ");
     console_println("=================================");
 }
 
@@ -35,15 +34,15 @@ void test_memory_allocator(void) {
     void* ptr2 = kmalloc(128);
     void* ptr3 = kmalloc(256);
 
-    console_puts("Allocated ptr1: ");
+    console_puts("allocated ptr1: ");
     console_put_hex((uintptr_t)ptr1);
     console_puts("\n");
 
-    console_puts("Allocated ptr2: ");
+    console_puts("allocated ptr2: ");
     console_put_hex((uintptr_t)ptr2);
     console_puts("\n");
 
-    console_puts("Allocated ptr3: ");
+    console_puts("allocated ptr3: ");
     console_put_hex((uintptr_t)ptr3);
     console_puts("\n");
 
@@ -78,11 +77,9 @@ void kernel_main() {
     console_init();
     memory_init();
 
-    // ✅ Initialize the file system
     fs_init();
     console_puts("[DEBUG] fs_init() called\n");
 
-    // ✅ Dump initial FS state
     char buf[16];
     console_puts("[DEBUG] Filesystem state before shell: file_count=");
     itoa(fs.file_count, buf, 10);
